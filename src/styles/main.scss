@@ -1,4 +1,5 @@
 :root {
+  $grid: 8px;
   --color: #f6f6f6;
   --back: #181818;
   --add-to-back: lightgrey;
@@ -20,34 +21,33 @@ body {
   height: 100vh;
   flex-direction: column;
   background: var(--back);
-}
 
-.container > .add-to {
+  > .add-to {
     background: var(--add-to-back);
-    padding: calc(8px * 2);
+    padding: calc($grid * 2);
   }
 
-.container > .list {
+  > .list {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    padding: 8px;
+    padding: $grid;
     background: var(--list-back);
     overflow-y: scroll;
-  }
 
-.container > .list.dragging-over {
+    &.dragging-over {
       background: var(--list-back-drag);
     }
 
-.container > .list > .item {
-      -webkit-user-select: none;
-              user-select: none;
-      padding: calc(8px * 2);
-      margin: 0 0 calc(8px) 0;
+    > .item {
+      user-select: none;
+      padding: calc($grid * 2);
+      margin: 0 0 calc($grid) 0;
       background: var(--item-back);
-    }
 
-.container > .list > .item.dragging {
+      &.dragging {
         background: var(--item-back-drag);
       }
+    }
+  }
+}
