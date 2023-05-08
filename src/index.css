@@ -139,8 +139,16 @@ body {
 .container > .list > .item > .amount {
         flex-basis: 10%;
         text-align: right;
-        color: var(--up-color);
+        color: var(--color);
       }
+
+.container > .list > .item > .amount .change.increase {
+            color: var(--up-color);
+          }
+
+.container > .list > .item > .amount .change.decrease {
+            color: var(--down-color);
+          }
 
 .container > .list > .item > .remove {
         flex-basis: 5%;

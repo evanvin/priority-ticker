@@ -141,7 +141,17 @@ body {
       > .amount {
         flex-basis: 10%;
         text-align: right;
-        color: var(--up-color);
+        color: var(--color);
+
+        .change {
+          &.increase {
+            color: var(--up-color);
+          }
+
+          &.decrease {
+            color: var(--down-color);
+          }
+        }
       }
 
       > .remove {
