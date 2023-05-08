@@ -1,34 +1,46 @@
+import axios from 'axios';
 import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 /* <p className="App-logo">https://codepen.io/chris22smith/pen/YZPrjr</p> */
 
+const itemsLocalStorageKey = 'priority-ticker-items';
+
 const reorder = (
-  list: Array<any>,
+  list: Array<Item>,
   startIndex: number,
   endIndex: number
-): Array<any> => {
+): Array<Item> => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
+  removed['lastUpdated'] = new Date();
+  removed['changeAmount'] = '' + (startIndex - endIndex);
+
   result.splice(endIndex, 0, removed);
 
   return result;
 };
 
-const getItems = (count: number): Array<any> =>
-  Array.from({ length: count }, (v, k) => k).map((k) => ({
-    id: `item-${k}`,
-    content: `item ${k}`,
-  }));
-
+type Item = {
+  id: string;
+  name: string;
+  changeDirection?: string;
+  changeAmount?: string;
+  lastUpdated?: Date;
+  createdAt: Date;
+};
 type MyProps = {};
 type MyState = {
-  items: any[];
+  items: Item[];
+  typedItem: string;
+  adhdMode: boolean;
 };
 
 class App extends React.Component<MyProps, MyState> {
-  state: MyState = { items: getItems(30) };
+  state: MyState = { items: [], typedItem: '', adhdMode: true };
 
   onDragEnd = (result: any) => {
     // dropped outside the list
@@ -42,15 +54,68 @@ class App extends React.Component<MyProps, MyState> {
       result.destination.index
     );
 
+    localStorage.setItem(itemsLocalStorageKey, JSON.stringify(items));
+
     this.setState({
       items,
     });
   };
 
+  handleKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      this.add();
+    }
+  };
+
+  add = (): void => {
+    const { items, typedItem } = this.state;
+
+    const item: Item = {
+      id: uuidv4(),
+      name: typedItem,
+      createdAt: new Date(),
+    };
+
+    items.push(item);
+
+    localStorage.setItem(itemsLocalStorageKey, JSON.stringify(items));
+
+    this.setState({ items, typedItem: '' });
+  };
+
+  componentDidMount() {
+    let ls: string | null = localStorage.getItem(itemsLocalStorageKey);
+
+    let items = [];
+
+    if (ls != null) {
+      items = JSON.parse(ls);
+    }
+
+    this.setState({ items });
+  }
+
   render() {
     return (
       <div className='container'>
-        <div className='add-to'>test</div>
+        <div className='add-to'>
+          <div className='input-group'>
+            <input
+              onKeyUp={(e) => {
+                this.handleKeyUp(e);
+              }}
+              value={this.state.typedItem}
+              placeholder='Add Item'
+              className='input-field'
+              type='text'
+              onChange={(e) => {
+                this.setState({ typedItem: e.target.value });
+              }}
+            />
+            <button>ADD</button>
+            <button>ADHD MODE OFF</button>
+          </div>
+        </div>
         <DragDropContext onDragEnd={this.onDragEnd}>
           <Droppable droppableId='droppable'>
             {(provided, snapshot) => (
@@ -70,10 +135,16 @@ class App extends React.Component<MyProps, MyState> {
                         {...provided.dragHandleProps}
                         className={`item ${
                           snapshot.isDragging ? 'dragging' : ''
-                        }`}
+                        } ${this.state.adhdMode ? 'adhd' : ''}`}
                         style={provided.draggableProps.style}
                       >
-                        {item.content}
+                        <div className='name'>{item.name}</div>
+                        {this.state.adhdMode && (
+                          <div className='amount'>
+                            {item.changeDirection} {item.changeAmount}
+                          </div>
+                        )}
+                        <div className='remove'>x</div>
                       </div>
                     )}
                   </Draggable>
