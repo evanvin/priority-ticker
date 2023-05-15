@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/priority-ticker/static/css/main.9b87c36e.css",
+    "main.js": "/priority-ticker/static/js/main.133aa95f.js",
+    "static/js/787.0791083a.chunk.js": "/priority-ticker/static/js/787.0791083a.chunk.js",
+    "index.html": "/priority-ticker/index.html",
+    "main.9b87c36e.css.map": "/priority-ticker/static/css/main.9b87c36e.css.map",
+    "main.133aa95f.js.map": "/priority-ticker/static/js/main.133aa95f.js.map",
+    "787.0791083a.chunk.js.map": "/priority-ticker/static/js/787.0791083a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9b87c36e.css",
+    "static/js/main.133aa95f.js"
+  ]
+}
