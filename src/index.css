@@ -45,7 +45,7 @@ body {
     }
 
 .container > .add-to > .input-group > .input-field {
-        min-height: 48px;
+        min-height: 36px;
         max-width: 150px;
         padding: 0 1rem;
         color: #fff;
@@ -62,7 +62,7 @@ body {
         }
 
 .container > .add-to > .input-group > button {
-        min-height: 50px;
+        min-height: 38px;
         padding: 0.5em 1em;
         border: none;
         background-color: var(--add-to-input);

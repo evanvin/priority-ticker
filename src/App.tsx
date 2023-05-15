@@ -15,7 +15,6 @@ const reorder = (
   endIndex: number
 ): Array<Item> => {
   const result = Array.from(list);
-  const og = Array.from(list);
 
   const [removed] = result.splice(startIndex, 1);
   removed['lastUpdated'] = new Date();
@@ -31,20 +30,16 @@ const reorder = (
     removed['changeAmount'] = change;
   }
 
-  console.log(startIndex, endIndex);
-  // let pre2 = result.slice(endIndex);
-  // console.log(pre2);
-
   result.splice(endIndex, 0, removed);
 
   if (startIndex < endIndex) {
     // increase all that were moved above the currently selected by one
-    for (let i = 0; i < endIndex; i++) {
+    for (let i = startIndex; i < endIndex; i++) {
       result[i].changeAmount += 1;
     }
   } else {
     // decrease all that were moved below the currently select by one
-    for (let i = endIndex; i < startIndex; i++) {
+    for (let i = endIndex + 1; i <= startIndex; i++) {
       result[i].changeAmount -= 1;
     }
   }
@@ -131,6 +126,16 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({ items, typedItem: '' });
   };
 
+  delete = (index: number): void => {
+    const { items } = this.state;
+
+    items.splice(index, 1);
+
+    localStorage.setItem(itemsLocalStorageKey, JSON.stringify(items));
+
+    this.setState({ items });
+  };
+
   componentDidMount() {
     let ls: string | null = localStorage.getItem(itemsLocalStorageKey);
 
@@ -160,8 +165,7 @@ class App extends React.Component<MyProps, MyState> {
                 this.setState({ typedItem: e.target.value });
               }}
             />
-            <button>ADD</button>
-            <button>ADHD MODE OFF</button>
+            <button onClick={this.add}>ADD</button>
           </div>
         </div>
         <DragDropContext onDragEnd={this.onDragEnd}>
@@ -192,7 +196,12 @@ class App extends React.Component<MyProps, MyState> {
                             {getArrow(item.changeAmount)}
                           </div>
                         )}
-                        <div className='remove'>x</div>
+                        <div
+                          className='remove'
+                          onClick={(e) => this.delete(index)}
+                        >
+                          x
+                        </div>
                       </div>
                     )}
                   </Draggable>
