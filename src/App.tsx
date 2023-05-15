@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import fullEnterIcon from './full_enter.svg';
+import fullExitIcon from './full_exit.svg';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -74,15 +76,17 @@ type Item = {
   lastUpdated?: Date;
   createdAt: Date;
 };
-type MyProps = {};
+type MyProps = {
+  fullScreenHandle: any;
+};
 type MyState = {
   items: Item[];
   typedItem: string;
-  adhdMode: boolean;
+  isFullScreen: boolean;
 };
 
 class App extends React.Component<MyProps, MyState> {
-  state: MyState = { items: [], typedItem: '', adhdMode: true };
+  state: MyState = { items: [], typedItem: '', isFullScreen: false };
 
   onDragEnd = (result: any) => {
     // dropped outside the list
@@ -136,6 +140,16 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({ items });
   };
 
+  changeFullScreen = () => {
+    if (this.state.isFullScreen) {
+      this.props.fullScreenHandle.exit();
+    } else {
+      this.props.fullScreenHandle.enter();
+    }
+
+    this.setState({ isFullScreen: !this.state.isFullScreen });
+  };
+
   componentDidMount() {
     let ls: string | null = localStorage.getItem(itemsLocalStorageKey);
 
@@ -149,6 +163,8 @@ class App extends React.Component<MyProps, MyState> {
   }
 
   render() {
+    const { isFullScreen } = this.state;
+
     return (
       <div className='container'>
         <div className='add-to'>
@@ -166,6 +182,13 @@ class App extends React.Component<MyProps, MyState> {
               }}
             />
             <button onClick={this.add}>ADD</button>
+          </div>
+          <div className='full-screen-btn' onClick={this.changeFullScreen}>
+            <img
+              src={isFullScreen ? fullExitIcon : fullEnterIcon}
+              className='full-icon'
+              alt='fullscreen-icon'
+            />
           </div>
         </div>
         <DragDropContext onDragEnd={this.onDragEnd}>
@@ -187,15 +210,13 @@ class App extends React.Component<MyProps, MyState> {
                         {...provided.dragHandleProps}
                         className={`item ${
                           snapshot.isDragging ? 'dragging' : ''
-                        } ${this.state.adhdMode ? 'adhd' : ''}`}
+                        }`}
                         style={provided.draggableProps.style}
                       >
                         <div className='name'>{item.name}</div>
-                        {this.state.adhdMode && (
-                          <div className='amount'>
-                            {getArrow(item.changeAmount)}
-                          </div>
-                        )}
+                        <div className='amount'>
+                          {getArrow(item.changeAmount)}
+                        </div>
                         <div
                           className='remove'
                           onClick={(e) => this.delete(index)}

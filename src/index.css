@@ -39,6 +39,19 @@ body {
     justify-content: center;
   }
 
+.container > .add-to > .full-screen-btn {
+      background-color: transparent;
+      cursor: pointer;
+      max-height: 38px;
+      padding: 0 1em;
+      display: flex;
+      justify-items: center;
+    }
+
+.container > .add-to > .full-screen-btn > svg > g > path {
+        fill: var(--add-to-input);
+      }
+
 .container > .add-to > .input-group {
       display: flex;
       align-items: center;
@@ -46,7 +59,7 @@ body {
 
 .container > .add-to > .input-group > .input-field {
         min-height: 36px;
-        max-width: 150px;
+        min-width: 150px;
         padding: 0 1rem;
         color: #fff;
         font-size: 15px;
@@ -126,14 +139,10 @@ body {
       }
 
 .container > .list > .item > .name {
-        flex-basis: 95%;
+        flex-basis: 85%;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-      }
-
-.container > .list > .item.adhd > .name {
-        flex-basis: 85%;
       }
 
 .container > .list > .item > .amount {

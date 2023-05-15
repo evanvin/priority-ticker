@@ -43,13 +43,26 @@ body {
     display: flex;
     justify-content: center;
 
+    > .full-screen-btn {
+      background-color: transparent;
+      cursor: pointer;
+      max-height: 38px;
+      padding: 0 1em;
+      display: flex;
+      justify-items: center;
+
+      > svg > g > path {
+        fill: var(--add-to-input);
+      }
+    }
+
     > .input-group {
       display: flex;
       align-items: center;
 
       > .input-field {
         min-height: 36px;
-        max-width: 150px;
+        min-width: 150px;
         padding: 0 1rem;
         color: #fff;
         font-size: 15px;
@@ -128,14 +141,10 @@ body {
       }
 
       > .name {
-        flex-basis: 95%;
+        flex-basis: 85%;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-      }
-
-      &.adhd > .name {
-        flex-basis: 85%;
       }
 
       > .amount {
