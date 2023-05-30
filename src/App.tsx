@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import fullEnterIcon from './full_enter.svg';
@@ -6,10 +5,9 @@ import fullExitIcon from './full_exit.svg';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { JsonBinApi } from './jsonbin';
 
-/* <p className="App-logo">https://codepen.io/chris22smith/pen/YZPrjr</p> */
-
-const itemsLocalStorageKey = 'priority-ticker-items';
+const jsonBinApiLS = 'priority-ticker-json-bin';
 
 const reorder = (
   list: Array<Item>,
@@ -83,10 +81,18 @@ type MyState = {
   items: Item[];
   typedItem: string;
   isFullScreen: boolean;
+  jsonBinApi: JsonBinApi;
+  jsonBinId: string;
 };
 
 class App extends React.Component<MyProps, MyState> {
-  state: MyState = { items: [], typedItem: '', isFullScreen: false };
+  state: MyState = {
+    jsonBinId: '',
+    items: [],
+    typedItem: '',
+    isFullScreen: false,
+    jsonBinApi: new JsonBinApi(''),
+  };
 
   onDragEnd = (result: any) => {
     // dropped outside the list
@@ -100,7 +106,7 @@ class App extends React.Component<MyProps, MyState> {
       result.destination.index
     );
 
-    localStorage.setItem(itemsLocalStorageKey, JSON.stringify(items));
+    localStorage.setItem(jsonBinApiLS, JSON.stringify(items));
 
     this.setState({
       items,
@@ -125,7 +131,7 @@ class App extends React.Component<MyProps, MyState> {
 
     items.push(item);
 
-    localStorage.setItem(itemsLocalStorageKey, JSON.stringify(items));
+    localStorage.setItem(jsonBinApiLS, JSON.stringify(items));
 
     this.setState({ items, typedItem: '' });
   };
@@ -135,7 +141,7 @@ class App extends React.Component<MyProps, MyState> {
 
     items.splice(index, 1);
 
-    localStorage.setItem(itemsLocalStorageKey, JSON.stringify(items));
+    localStorage.setItem(jsonBinApiLS, JSON.stringify(items));
 
     this.setState({ items });
   };
@@ -150,16 +156,45 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({ isFullScreen: !this.state.isFullScreen });
   };
 
-  componentDidMount() {
-    let ls: string | null = localStorage.getItem(itemsLocalStorageKey);
+  async componentDidMount() {
+    let jsonBin: string | null = localStorage.getItem(jsonBinApiLS);
 
-    let items = [];
+    let key: string | null = null;
+    let bin: string | null = null;
 
-    if (ls != null) {
-      items = JSON.parse(ls);
+    if (jsonBin == null) {
+      key = window.prompt('Please enter your JSON Bin API Key');
+      bin = window.prompt('Please enter your JSON Bin ID');
+    } else {
+      let ls = JSON.parse(jsonBin);
+
+      key =
+        ls['key'] == null
+          ? window.prompt('Please enter your JSON Bin API Key')
+          : ls['key'];
+      bin =
+        ls['bin'] == null
+          ? window.prompt('Please enter your JSON Bin ID')
+          : ls['bin'];
     }
 
-    this.setState({ items });
+    let jsonBinApi = new JsonBinApi(String(key));
+
+    localStorage.setItem(
+      jsonBinApiLS,
+      JSON.stringify({
+        key: String(key),
+        bin: String(bin),
+      })
+    );
+
+    const itms = await jsonBinApi.readData(String(bin));
+
+    this.setState({
+      jsonBinApi,
+      jsonBinId: String(bin),
+      items: itms['record']['items'],
+    });
   }
 
   render() {
