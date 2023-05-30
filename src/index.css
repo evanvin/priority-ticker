@@ -25,6 +25,55 @@ body {
   color: var(--color);
 }
 
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.input-group > .input-field {
+    min-height: 36px;
+    min-width: 150px;
+    padding: 0 1rem;
+    color: #fff;
+    font-size: 15px;
+    border: 1px solid var(--add-to-input);
+    border-radius: 6px 0 0 6px;
+    background-color: transparent;
+  }
+
+.input-group > .input-field:focus,
+    .input-group > .input-field:focus-visible {
+      border-color: var(--add-to-input-focus);
+      outline: none;
+    }
+
+.input-group > button {
+    min-height: 38px;
+    padding: 0.5em 1em;
+    border: none;
+    background-color: var(--add-to-input);
+    color: var(--add-to-input-color);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+.input-group > button:hover {
+      background-color: var(--add-to-input);
+    }
+
+.input-group > button.active {
+      background: var(--add-to-input-acc-1-active);
+    }
+
+.input-group > button:nth-child(3) {
+      background: var(--add-to-input-acc-1);
+    }
+
+.input-group > button:last-child {
+      border-radius: 0 6px 6px 0;
+    }
+
 .container {
   display: flex;
   height: 100vh;
@@ -39,7 +88,7 @@ body {
     justify-content: center;
   }
 
-.container > .add-to > .full-screen-btn {
+.container > .add-to > .btn {
       background-color: transparent;
       cursor: pointer;
       max-height: 38px;
@@ -48,58 +97,9 @@ body {
       justify-items: center;
     }
 
-.container > .add-to > .full-screen-btn > svg > g > path {
+.container > .add-to > .btn > svg > g > path {
         fill: var(--add-to-input);
       }
-
-.container > .add-to > .input-group {
-      display: flex;
-      align-items: center;
-    }
-
-.container > .add-to > .input-group > .input-field {
-        min-height: 36px;
-        min-width: 150px;
-        padding: 0 1rem;
-        color: #fff;
-        font-size: 15px;
-        border: 1px solid var(--add-to-input);
-        border-radius: 6px 0 0 6px;
-        background-color: transparent;
-      }
-
-.container > .add-to > .input-group > .input-field:focus,
-        .container > .add-to > .input-group > .input-field:focus-visible {
-          border-color: var(--add-to-input-focus);
-          outline: none;
-        }
-
-.container > .add-to > .input-group > button {
-        min-height: 38px;
-        padding: 0.5em 1em;
-        border: none;
-        background-color: var(--add-to-input);
-        color: var(--add-to-input-color);
-        font-size: 15px;
-        cursor: pointer;
-        transition: background-color 0.3s ease-in-out;
-      }
-
-.container > .add-to > .input-group > button:hover {
-          background-color: var(--add-to-input);
-        }
-
-.container > .add-to > .input-group > button.active {
-          background: var(--add-to-input-acc-1-active);
-        }
-
-.container > .add-to > .input-group > button:nth-child(3) {
-          background: var(--add-to-input-acc-1);
-        }
-
-.container > .add-to > .input-group > button:last-child {
-          border-radius: 0 6px 6px 0;
-        }
 
 .container > .list {
     display: flex;
@@ -180,4 +180,73 @@ body {
         .container > .list > .item > div {
           padding: calc(8px * 2);
         }
+  }
+
+.loader {
+  display: flex;
+  justify-content: center;
+}
+
+.loader > span {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    animation: rotate 1.5s ease-in infinite alternate;
+  }
+
+.loader > span::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      color: var(--add-to-input-acc-1-active);
+      background: currentColor;
+      width: 64px;
+      height: 32px;
+      border-radius: 0 0 50px 50px;
+    }
+
+.loader > span::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 10%;
+      background: var(--add-to-input-acc-1);
+      width: 8px;
+      height: 64px;
+      animation: rotate 1.2s linear infinite alternate-reverse;
+    }
+
+@keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+.drawer {
+  transition: height 0.5s ease;
+  bottom: 0;
+  width: 80vw;
+  left: 10vw;
+  position: absolute;
+  height: 10vh;
+  display: block;
+  border: 1px solid var(--add-to-input);
+  border-bottom: 0px;
+  border-radius: 6px 6px 0px 0px;
+}
+
+.drawer.closed {
+    height: 0px;
+    bottom: -1px;
+  }
+
+.drawer > div.content {
+    display: flex;
+    background-color: var(--back);
+    padding: 0px 10px;
+    height: 10vh;
+    border-radius: 6px 6px 0px 0px;
+    justify-content: space-evenly;
+    align-items: center;
   }

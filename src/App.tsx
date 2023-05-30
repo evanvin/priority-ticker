@@ -2,10 +2,12 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import fullEnterIcon from './full_enter.svg';
 import fullExitIcon from './full_exit.svg';
+import settingsIcon from './settings.svg';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { JsonBinApi } from './jsonbin';
+import classNames from 'classnames';
 
 const jsonBinApiLS = 'priority-ticker-json-bin';
 
@@ -81,17 +83,25 @@ type MyState = {
   items: Item[];
   typedItem: string;
   isFullScreen: boolean;
-  jsonBinApi: JsonBinApi;
-  jsonBinId: string;
+  jbApi: JsonBinApi;
+  jbApiKey: string;
+  jbBinId: string;
+  isLoadingJsonBin: boolean;
+  isConfigured: boolean;
+  showSettings: boolean;
 };
 
 class App extends React.Component<MyProps, MyState> {
   state: MyState = {
-    jsonBinId: '',
     items: [],
     typedItem: '',
     isFullScreen: false,
-    jsonBinApi: new JsonBinApi(''),
+    jbApi: new JsonBinApi('', ''),
+    isLoadingJsonBin: true,
+    showSettings: false,
+    isConfigured: false,
+    jbApiKey: '',
+    jbBinId: '',
   };
 
   onDragEnd = (result: any) => {
@@ -106,7 +116,7 @@ class App extends React.Component<MyProps, MyState> {
       result.destination.index
     );
 
-    localStorage.setItem(jsonBinApiLS, JSON.stringify(items));
+    this.state.jbApi.updateData(JSON.stringify(items));
 
     this.setState({
       items,
@@ -120,7 +130,7 @@ class App extends React.Component<MyProps, MyState> {
   };
 
   add = (): void => {
-    const { items, typedItem } = this.state;
+    const { items, typedItem, jbApi: jsonBinApi } = this.state;
 
     const item: Item = {
       id: uuidv4(),
@@ -131,22 +141,22 @@ class App extends React.Component<MyProps, MyState> {
 
     items.push(item);
 
-    localStorage.setItem(jsonBinApiLS, JSON.stringify(items));
+    jsonBinApi.updateData(JSON.stringify(items));
 
     this.setState({ items, typedItem: '' });
   };
 
   delete = (index: number): void => {
-    const { items } = this.state;
+    const { items, jbApi: jsonBinApi } = this.state;
 
     items.splice(index, 1);
 
-    localStorage.setItem(jsonBinApiLS, JSON.stringify(items));
+    jsonBinApi.updateData(JSON.stringify(items));
 
     this.setState({ items });
   };
 
-  changeFullScreen = () => {
+  changeFullScreen = (): void => {
     if (this.state.isFullScreen) {
       this.props.fullScreenHandle.exit();
     } else {
@@ -156,12 +166,63 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({ isFullScreen: !this.state.isFullScreen });
   };
 
+  toggleSettings = () => {
+    this.setState({ showSettings: !this.state.showSettings });
+  };
+
+  updateJB = () => {
+    const { jbApiKey, jbBinId } = this.state;
+    console.log(this.state);
+    localStorage.setItem(
+      jsonBinApiLS,
+      JSON.stringify({
+        key: jbApiKey,
+        bin: jbBinId,
+      })
+    );
+
+    this.setState({
+      jbApi: new JsonBinApi(String(jbApiKey), String(jbBinId)),
+    });
+  };
+
   async componentDidMount() {
     let jsonBin: string | null = localStorage.getItem(jsonBinApiLS);
 
-    let key: string | null = null;
-    let bin: string | null = null;
+    if (jsonBin != null) {
+      const ls = JSON.parse(jsonBin);
+      const jsonBinApi = new JsonBinApi(ls['key'], ls['bin']);
 
+      localStorage.setItem(
+        jsonBinApiLS,
+        JSON.stringify({
+          key: ls['key'],
+          bin: ls['bin'],
+        })
+      );
+
+      try {
+        const items = await jsonBinApi.readData();
+        this.setState({
+          jbApi: jsonBinApi,
+          items: items['record'],
+          isConfigured: true,
+        });
+      } catch (error: any) {
+        console.log(error);
+      }
+
+      this.setState({
+        jbApiKey: ls['key'],
+        jbBinId: ls['bin'],
+      });
+    }
+
+    this.setState({
+      isLoadingJsonBin: false,
+    });
+
+    /*
     if (jsonBin == null) {
       key = window.prompt('Please enter your JSON Bin API Key');
       bin = window.prompt('Please enter your JSON Bin ID');
@@ -178,96 +239,131 @@ class App extends React.Component<MyProps, MyState> {
           : ls['bin'];
     }
 
-    let jsonBinApi = new JsonBinApi(String(key));
-
-    localStorage.setItem(
-      jsonBinApiLS,
-      JSON.stringify({
-        key: String(key),
-        bin: String(bin),
-      })
-    );
-
-    const itms = await jsonBinApi.readData(String(bin));
-
-    this.setState({
-      jsonBinApi,
-      jsonBinId: String(bin),
-      items: itms['record']['items'],
-    });
+    let jsonBinApi = new JsonBinApi(String(key), String(bin));
+*/
   }
 
   render() {
-    const { isFullScreen } = this.state;
+    const { isFullScreen, isLoadingJsonBin } = this.state;
 
     return (
-      <div className='container'>
-        <div className='add-to'>
-          <div className='input-group'>
-            <input
-              onKeyUp={(e) => {
-                this.handleKeyUp(e);
-              }}
-              value={this.state.typedItem}
-              placeholder='Add Item'
-              className='input-field'
-              type='text'
-              onChange={(e) => {
-                this.setState({ typedItem: e.target.value });
-              }}
-            />
-            <button onClick={this.add}>ADD</button>
+      <>
+        <div className='container'>
+          <div className='add-to'>
+            <div className='input-group'>
+              <input
+                onKeyUp={(e) => {
+                  this.handleKeyUp(e);
+                }}
+                value={this.state.typedItem}
+                placeholder='Add Item'
+                className='input-field'
+                type='text'
+                onChange={(e) => {
+                  this.setState({ typedItem: e.target.value });
+                }}
+              />
+              <button onClick={this.add}>ADD</button>
+            </div>
+            <div className='btn' onClick={this.changeFullScreen}>
+              <img
+                src={isFullScreen ? fullExitIcon : fullEnterIcon}
+                alt='fullscreen-icon'
+              />
+            </div>
+            <div className='btn' onClick={this.toggleSettings}>
+              <img src={settingsIcon} alt='settings-icon' />
+            </div>
           </div>
-          <div className='full-screen-btn' onClick={this.changeFullScreen}>
-            <img
-              src={isFullScreen ? fullExitIcon : fullEnterIcon}
-              className='full-icon'
-              alt='fullscreen-icon'
-            />
+          {isLoadingJsonBin ? (
+            <div className='loader'>
+              <span />
+            </div>
+          ) : this.state.isConfigured ? (
+            <DragDropContext onDragEnd={this.onDragEnd}>
+              <Droppable droppableId='droppable'>
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={classNames('list', {
+                      'dragging-over': snapshot.isDraggingOver,
+                    })}
+                  >
+                    {this.state.items.map((item: any, index: number) => (
+                      <Draggable
+                        key={item.id}
+                        draggableId={item.id}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={classNames('item', {
+                              dragging: snapshot.isDragging,
+                            })}
+                            style={provided.draggableProps.style}
+                          >
+                            <div className='name'>{item.name}</div>
+                            <div className='amount'>
+                              {getArrow(item.changeAmount)}
+                            </div>
+                            <div
+                              className='remove'
+                              onClick={(e) => this.delete(index)}
+                            >
+                              x
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          ) : (
+            <div className='list'>
+              <div className='item'>
+                <div className='name'>Needs Configuration</div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div
+          className={classNames('drawer', { closed: !this.state.showSettings })}
+        >
+          <div className='content'>
+            <div className='input-group'>
+              <input
+                value={this.state.jbApiKey}
+                placeholder='API Key'
+                className='input-field'
+                type='password'
+                onChange={(e) => {
+                  this.setState({ jbApiKey: e.target.value });
+                }}
+              />
+              <button onClick={this.updateJB}>UPDATE</button>
+            </div>
+            <div className='input-group'>
+              <input
+                value={this.state.jbBinId}
+                placeholder='Bin ID'
+                className='input-field'
+                type='text'
+                onChange={(e) => {
+                  this.setState({ jbBinId: e.target.value });
+                }}
+              />
+              <button onClick={this.updateJB}>UPDATE</button>
+            </div>
           </div>
         </div>
-        <DragDropContext onDragEnd={this.onDragEnd}>
-          <Droppable droppableId='droppable'>
-            {(provided, snapshot) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className={`list ${
-                  snapshot.isDraggingOver ? 'dragging-over' : ''
-                }`}
-              >
-                {this.state.items.map((item: any, index: number) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`item ${
-                          snapshot.isDragging ? 'dragging' : ''
-                        }`}
-                        style={provided.draggableProps.style}
-                      >
-                        <div className='name'>{item.name}</div>
-                        <div className='amount'>
-                          {getArrow(item.changeAmount)}
-                        </div>
-                        <div
-                          className='remove'
-                          onClick={(e) => this.delete(index)}
-                        >
-                          x
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </div>
+      </>
     );
   }
 }

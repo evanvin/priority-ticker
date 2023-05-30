@@ -1,4 +1,3 @@
-import React, { useCallback } from 'react';
 import App from './App';
 import { FullScreen, useFullScreenHandle } from 'react-full-screen';
 

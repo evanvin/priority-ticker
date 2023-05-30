@@ -6,6 +6,9 @@
 :root {
   $grid: 8px;
   $list-pad: 2%;
+  $drawer-height: 10vh;
+  $border-radius: 6px;
+  $z: 0px;
   $item-border: 0.5px solid var(--back);
   --color: #f6f6f6;
   --up-color: #0c0;
@@ -31,6 +34,55 @@ body {
   color: var(--color);
 }
 
+.input-group {
+  display: flex;
+  align-items: center;
+
+  > .input-field {
+    min-height: 36px;
+    min-width: 150px;
+    padding: 0 1rem;
+    color: #fff;
+    font-size: 15px;
+    border: 1px solid var(--add-to-input);
+    border-radius: $border-radius 0 0 $border-radius;
+    background-color: transparent;
+
+    &:focus,
+    &:focus-visible {
+      border-color: var(--add-to-input-focus);
+      outline: none;
+    }
+  }
+
+  > button {
+    min-height: 38px;
+    padding: 0.5em 1em;
+    border: none;
+    background-color: var(--add-to-input);
+    color: var(--add-to-input-color);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: var(--add-to-input);
+    }
+
+    &.active {
+      background: var(--add-to-input-acc-1-active);
+    }
+
+    &:nth-child(3) {
+      background: var(--add-to-input-acc-1);
+    }
+
+    &:last-child {
+      border-radius: 0 $border-radius $border-radius 0;
+    }
+  }
+}
+
 .container {
   display: flex;
   height: 100vh;
@@ -43,7 +95,7 @@ body {
     display: flex;
     justify-content: center;
 
-    > .full-screen-btn {
+    > .btn {
       background-color: transparent;
       cursor: pointer;
       max-height: 38px;
@@ -53,55 +105,6 @@ body {
 
       > svg > g > path {
         fill: var(--add-to-input);
-      }
-    }
-
-    > .input-group {
-      display: flex;
-      align-items: center;
-
-      > .input-field {
-        min-height: 36px;
-        min-width: 150px;
-        padding: 0 1rem;
-        color: #fff;
-        font-size: 15px;
-        border: 1px solid var(--add-to-input);
-        border-radius: 6px 0 0 6px;
-        background-color: transparent;
-
-        &:focus,
-        &:focus-visible {
-          border-color: var(--add-to-input-focus);
-          outline: none;
-        }
-      }
-
-      > button {
-        min-height: 38px;
-        padding: 0.5em 1em;
-        border: none;
-        background-color: var(--add-to-input);
-        color: var(--add-to-input-color);
-        font-size: 15px;
-        cursor: pointer;
-        transition: background-color 0.3s ease-in-out;
-
-        &:hover {
-          background-color: var(--add-to-input);
-        }
-
-        &.active {
-          background: var(--add-to-input-acc-1-active);
-        }
-
-        &:nth-child(3) {
-          background: var(--add-to-input-acc-1);
-        }
-
-        &:last-child {
-          border-radius: 0 6px 6px 0;
-        }
       }
     }
   }
@@ -192,5 +195,74 @@ body {
         }
       }
     }
+  }
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+
+  > span {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    animation: rotate 1.5s ease-in infinite alternate;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      color: var(--add-to-input-acc-1-active);
+      background: currentColor;
+      width: 64px;
+      height: 32px;
+      border-radius: 0 0 50px 50px;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 10%;
+      background: var(--add-to-input-acc-1);
+      width: 8px;
+      height: 64px;
+      animation: rotate 1.2s linear infinite alternate-reverse;
+    }
+
+    @keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
+}
+
+.drawer {
+  transition: height 0.5s ease;
+  bottom: 0;
+  width: 80vw;
+  left: 10vw;
+  position: absolute;
+  height: $drawer-height;
+  display: block;
+  border: 1px solid var(--add-to-input);
+  border-bottom: $z;
+  border-radius: $border-radius $border-radius $z $z;
+
+  &.closed {
+    height: $z;
+    bottom: -1px;
+  }
+
+  > div.content {
+    display: flex;
+    background-color: var(--back);
+    padding: $z 10px;
+    height: $drawer-height;
+    border-radius: $border-radius $border-radius $z $z;
+    justify-content: space-evenly;
+    align-items: center;
   }
 }
