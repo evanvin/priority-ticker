@@ -5,7 +5,13 @@ import fullExitIcon from './full_exit.svg';
 import settingsIcon from './settings.svg';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  ResponderProvided,
+  DragStart,
+} from 'react-beautiful-dnd';
 import { JsonBinApi } from './jsonbin';
 import classNames from 'classnames';
 
@@ -83,6 +89,7 @@ type MyState = {
   items: Item[];
   typedItem: string;
   isFullScreen: boolean;
+  isDragging: boolean;
   jbApi: JsonBinApi;
   jbApiKey: string;
   jbBinId: string;
@@ -98,6 +105,7 @@ class App extends React.Component<MyProps, MyState> {
     isFullScreen: false,
     jbApi: new JsonBinApi('', ''),
     isLoadingJsonBin: true,
+    isDragging: false,
     showSettings: false,
     isConfigured: false,
     jbApiKey: '',
@@ -105,8 +113,17 @@ class App extends React.Component<MyProps, MyState> {
   };
 
   onDragEnd = (result: any) => {
+    console.log(result);
     // dropped outside the list
     if (!result.destination) {
+      this.setState({
+        isDragging: false,
+      });
+      return;
+    }
+
+    if (result.destination.droppableId === 'deletable') {
+      this.delete(result.source.index);
       return;
     }
 
@@ -120,7 +137,12 @@ class App extends React.Component<MyProps, MyState> {
 
     this.setState({
       items,
+      isDragging: false,
     });
+  };
+
+  onDragStart = (start: DragStart, provided: ResponderProvided) => {
+    this.setState({ isDragging: true });
   };
 
   handleKeyUp = (e: React.KeyboardEvent) => {
@@ -153,7 +175,7 @@ class App extends React.Component<MyProps, MyState> {
 
     jsonBinApi.updateData(JSON.stringify(items));
 
-    this.setState({ items });
+    this.setState({ items, isDragging: false });
   };
 
   changeFullScreen = (): void => {
@@ -221,26 +243,6 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({
       isLoadingJsonBin: false,
     });
-
-    /*
-    if (jsonBin == null) {
-      key = window.prompt('Please enter your JSON Bin API Key');
-      bin = window.prompt('Please enter your JSON Bin ID');
-    } else {
-      let ls = JSON.parse(jsonBin);
-
-      key =
-        ls['key'] == null
-          ? window.prompt('Please enter your JSON Bin API Key')
-          : ls['key'];
-      bin =
-        ls['bin'] == null
-          ? window.prompt('Please enter your JSON Bin ID')
-          : ls['bin'];
-    }
-
-    let jsonBinApi = new JsonBinApi(String(key), String(bin));
-*/
   }
 
   render() {
@@ -280,7 +282,10 @@ class App extends React.Component<MyProps, MyState> {
               <span />
             </div>
           ) : this.state.isConfigured ? (
-            <DragDropContext onDragEnd={this.onDragEnd}>
+            <DragDropContext
+              onDragEnd={this.onDragEnd}
+              onDragStart={this.onDragStart}
+            >
               <Droppable droppableId='droppable'>
                 {(provided, snapshot) => (
                   <div
@@ -320,6 +325,22 @@ class App extends React.Component<MyProps, MyState> {
                         )}
                       </Draggable>
                     ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+
+              <Droppable droppableId='deletable'>
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={classNames('delete', {
+                      'dragging-over': snapshot.isDraggingOver,
+                      show: this.state.isDragging,
+                    })}
+                  >
+                    <div className='words'>{snapshot.isDraggingOver}</div>
                     {provided.placeholder}
                   </div>
                 )}

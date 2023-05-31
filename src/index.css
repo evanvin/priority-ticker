@@ -12,10 +12,10 @@
   --add-to-input-focus: #66545e;
   --add-to-input-color: #2b2a39;
   --list-back: var(--back);
-  --list-back-drag: lightblue;
+  --list-back-drag: var(--back);
   --item-back: #333;
   --item-back-alt: #474747;
-  --item-back-drag: lightgreen;
+  --item-back-drag: var(--add-to-input-acc-1-active);
 }
 
 body {
@@ -79,6 +79,7 @@ body {
   height: 100vh;
   flex-direction: column;
   background: var(--back);
+  overflow-x: hidden;
 }
 
 .container > .add-to {
@@ -100,6 +101,26 @@ body {
 .container > .add-to > .btn > svg > g > path {
         fill: var(--add-to-input);
       }
+
+.container > .delete {
+    /*display: none;*/
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 16vh;
+    width: 16vh;
+    border-radius: 16vh 0 0 0;
+    background-color: var(--down-color);
+    opacity: 0.5;
+  }
+
+.container > .delete.show {
+      display: block;
+    }
+
+.container > .delete.dragging-over {
+      opacity: 1;
+    }
 
 .container > .list {
     display: flex;
@@ -238,10 +259,12 @@ body {
 
 .drawer.closed {
     height: 0px;
-    bottom: -1px;
+    bottom: -2px;
+    overflow: hidden;
   }
 
 .drawer > div.content {
+    overflow: hidden;
     display: flex;
     background-color: var(--back);
     padding: 0px 10px;

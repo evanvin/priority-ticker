@@ -21,10 +21,10 @@
   --add-to-input-focus: #66545e;
   --add-to-input-color: #2b2a39;
   --list-back: var(--back);
-  --list-back-drag: lightblue;
+  --list-back-drag: var(--back);
   --item-back: #333;
   --item-back-alt: #474747;
-  --item-back-drag: lightgreen;
+  --item-back-drag: var(--add-to-input-acc-1-active);
 }
 
 body {
@@ -88,6 +88,7 @@ body {
   height: 100vh;
   flex-direction: column;
   background: var(--back);
+  overflow-x: hidden;
 
   > .add-to {
     background: var(--back);
@@ -106,6 +107,26 @@ body {
       > svg > g > path {
         fill: var(--add-to-input);
       }
+    }
+  }
+
+  > .delete {
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 16vh;
+    width: 16vh;
+    border-radius: 16vh 0 0 0;
+    background-color: var(--down-color);
+    opacity: 0.5;
+
+    &.show {
+      /*display: block;*/
+    }
+
+    &.dragging-over {
+      opacity: 1;
     }
   }
 
@@ -253,10 +274,12 @@ body {
 
   &.closed {
     height: $z;
-    bottom: -1px;
+    bottom: -2px;
+    overflow: hidden;
   }
 
   > div.content {
+    overflow: hidden;
     display: flex;
     background-color: var(--back);
     padding: $z 10px;
