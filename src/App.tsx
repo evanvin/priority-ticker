@@ -268,6 +268,16 @@ class App extends React.Component<MyProps, MyState> {
       });
     }
 
+    let webhookUrl: string | null = localStorage.getItem(webhookLS);
+
+    if (webhookUrl != null) {
+      const ls = JSON.parse(webhookUrl);
+
+      this.setState({
+        extraButtonWebhookURL: ls['url'],
+      });
+    }
+
     this.setState({
       isLoadingJsonBin: false,
     });
