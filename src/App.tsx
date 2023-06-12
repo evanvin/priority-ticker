@@ -1,7 +1,10 @@
 import React from 'react';
+import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+
 import fullEnterIcon from './full_enter.svg';
 import fullExitIcon from './full_exit.svg';
+import extraIcon from './extra.svg';
 import settingsIcon from './settings.svg';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -16,6 +19,7 @@ import { JsonBinApi } from './jsonbin';
 import classNames from 'classnames';
 
 const jsonBinApiLS = 'priority-ticker-json-bin';
+const webhookLS = 'priority-ticker-webhook';
 
 const reorder = (
   list: Array<Item>,
@@ -96,6 +100,7 @@ type MyState = {
   isLoadingJsonBin: boolean;
   isConfigured: boolean;
   showSettings: boolean;
+  extraButtonWebhookURL: string;
 };
 
 class App extends React.Component<MyProps, MyState> {
@@ -110,10 +115,10 @@ class App extends React.Component<MyProps, MyState> {
     isConfigured: false,
     jbApiKey: '',
     jbBinId: '',
+    extraButtonWebhookURL: '',
   };
 
   onDragEnd = (result: any) => {
-    console.log(result);
     // dropped outside the list
     if (!result.destination) {
       this.setState({
@@ -192,9 +197,22 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({ showSettings: !this.state.showSettings });
   };
 
+  executeExtra = async () => {
+    const { extraButtonWebhookURL } = this.state;
+
+    if (extraButtonWebhookURL !== '') {
+      try {
+        await axios.head(extraButtonWebhookURL);
+      } catch (error: any) {
+        console.error('An error occurred:', error.message);
+      }
+    } else {
+      alert('No extra wwebhook URL set');
+    }
+  };
+
   updateJB = () => {
     const { jbApiKey, jbBinId } = this.state;
-    console.log(this.state);
     localStorage.setItem(
       jsonBinApiLS,
       JSON.stringify({
@@ -206,6 +224,16 @@ class App extends React.Component<MyProps, MyState> {
     this.setState({
       jbApi: new JsonBinApi(String(jbApiKey), String(jbBinId)),
     });
+  };
+
+  updateExtraButtonWebhook = () => {
+    const { extraButtonWebhookURL } = this.state;
+    localStorage.setItem(
+      webhookLS,
+      JSON.stringify({
+        url: extraButtonWebhookURL,
+      })
+    );
   };
 
   async componentDidMount() {
@@ -275,6 +303,9 @@ class App extends React.Component<MyProps, MyState> {
             </div>
             <div className='btn' onClick={this.toggleSettings}>
               <img src={settingsIcon} alt='settings-icon' />
+            </div>
+            <div className='btn extra' onClick={this.executeExtra}>
+              <img src={extraIcon} alt='extra-icon' />
             </div>
           </div>
           {isLoadingJsonBin ? (
@@ -381,6 +412,18 @@ class App extends React.Component<MyProps, MyState> {
                 }}
               />
               <button onClick={this.updateJB}>UPDATE</button>
+            </div>
+            <div className='input-group'>
+              <input
+                value={this.state.extraButtonWebhookURL}
+                placeholder='Extra Button Webhook URL'
+                className='input-field'
+                type='text'
+                onChange={(e) => {
+                  this.setState({ extraButtonWebhookURL: e.target.value });
+                }}
+              />
+              <button onClick={this.updateExtraButtonWebhook}>UPDATE</button>
             </div>
           </div>
         </div>
